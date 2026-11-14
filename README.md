@@ -19,7 +19,7 @@ npm run build:single # alles in één HTML-bestand (dist-single/index.html)
 | Onderdeel | Functies |
 |---|---|
 | **Navigatie** | Megamenu per categorie, mobiel menu, live zoeken met suggesties (producten, categorieën, merken), toetsenbordbediening |
-| **Assortiment** | 10 hoofdcategorieën, 66 subcategorieën, 16 merken, ~300 producten met afwerkingsvarianten |
+| **Assortiment** | 10 hoofdcategorieën, 63 subcategorieën, 16 merken, 298 producten met afwerkingsvarianten |
 | **Productoverzicht** | Filters (type, merk, prijs, niveau, score, voorraad, actie) met live tellingen, filters in de URL (deelbaar), 6 sorteringen, raster/lijst, ‘meer laden’ |
 | **Productpagina** | Varianten met kleurwissel, voorraad + verwachte bezorgdatum, ‘vaak samen gekocht’-bundel, specificaties, reviews met verdeling, vergelijkbare en recent bekeken producten, sticky koopbalk op mobiel, schema.org-structured data |
 | **Conversie** | Winkelwagen-drawer met upsell, voortgangsbalk gratis verzending, kortingscodes (`WELKOM10`, `MUZIEK5`), verlanglijst (deelbaar), vergelijken (max. 4, verschillen gemarkeerd) |
