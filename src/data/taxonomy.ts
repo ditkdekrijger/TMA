@@ -1,105 +1,22 @@
 import type { Brand, Category, SubCategory } from './types'
 
-const cat = (
-  id: string, name: string, tagline: string, icon: Category['icon'], hue: number,
-  subs: [string, string][],
-): Category => ({
-  id, name, tagline, icon, hue,
-  children: subs.map(([sid, sname]) => ({ id: sid, name: sname, parent: id })),
-})
+import raw from './generated/catalog.json'
 
-export const categories: Category[] = [
-  cat('gitaren', 'Gitaren & basgitaren', 'Van eerste akkoord tot podium', 'acoustic', 28, [
-    ['akoestische-gitaren', 'Akoestische gitaren'],
-    ['klassieke-gitaren', 'Klassieke gitaren'],
-    ['elektrische-gitaren', 'Elektrische gitaren'],
-    ['basgitaren', 'Basgitaren'],
-    ['resonatorgitaren', 'Resonatorgitaren'],
-    ['akoestische-basgitaren', 'Akoestische basgitaren'],
-  ]),
-  cat('ukuleles', "Ukulele's", 'Klein formaat, groot plezier', 'ukulele', 42, [
-    ['sopraan-ukuleles', 'Sopraan'],
-    ['concert-ukuleles', 'Concert'],
-    ['tenor-ukuleles', 'Tenor'],
-    ['bariton-ukuleles', 'Bariton'],
-    ['bas-ukuleles', 'Bas-ukuleles'],
-    ['guitaleles', 'Guitaleles'],
-  ]),
-  cat('drums', 'Drums & percussie', 'Ritme voor elk niveau', 'drumkit', 8, [
-    ['akoestische-drumstellen', 'Akoestische drumstellen'],
-    ['elektronische-drums', 'Elektronische drums'],
-    ['junior-drums', 'Juniordrumstellen'],
-    ['snaredrums', 'Snaredrums'],
-    ['bekkens', 'Bekkens'],
-    ['handpercussie', 'Cajons & handpercussie'],
-    ['drumsticks', 'Drumsticks & mallets'],
-    ['drumvellen', 'Drumvellen'],
-  ]),
-  cat('toetsen', 'Toetsen', 'Piano, synth en orgel', 'piano', 220, [
-    ['digitale-pianos', "Digitale piano's"],
-    ['stage-pianos', "Stage piano's"],
-    ['keyboards', 'Keyboards'],
-    ['orgels-synths', 'Orgels & synthesizers'],
-    ['masterkeyboards', 'Masterkeyboards'],
-    ['toetsen-accessoires', 'Standaards & banken'],
-  ]),
-  cat('blaas', 'Blaasinstrumenten', 'Koper, hout en meer', 'sax', 45, [
-    ['saxofoons', 'Saxofoons'],
-    ['trompetten', 'Trompetten & bugels'],
-    ['trombones', 'Trombones'],
-    ['dwarsfluiten', 'Dwarsfluiten'],
-    ['klarinetten', 'Klarinetten'],
-    ['blokfluiten', 'Blokfluiten'],
-    ['mondharmonicas', "Mondharmonica's"],
-  ]),
-  cat('strijk', 'Strijkinstrumenten', 'Voor orkest en lesgroep', 'violin', 18, [
-    ['violen', 'Violen'],
-    ['altviolen', 'Altviolen'],
-    ['cellos', "Cello's"],
-    ['contrabassen', 'Contrabassen'],
-  ]),
-  cat('versterkers', 'Versterkers & effecten', 'Jouw sound, jouw regels', 'amp', 260, [
-    ['gitaarversterkers', 'Gitaarversterkers'],
-    ['basversterkers', 'Basversterkers'],
-    ['effectpedalen', 'Effectpedalen'],
-    ['multi-effecten', 'Multi-effecten'],
-    ['pedalboards', 'Pedalboards & voeding'],
-    ['draadloos', 'Draadloze systemen'],
-  ]),
-  cat('live-studio', 'Live & studio', 'PA, microfoons en opname', 'mic', 200, [
-    ['microfoons', 'Microfoons'],
-    ['mengpanelen', 'Mengpanelen'],
-    ['pa-speakers', 'PA-speakers'],
-    ['hoofdtelefoons', 'Hoofdtelefoons'],
-    ['audio-interfaces', 'Audio-interfaces'],
-    ['kabels', 'Kabels & connectoren'],
-  ]),
-  cat('accessoires', 'Accessoires', 'Alles wat je nodig hebt', 'strings', 150, [
-    ['snaren', 'Snaren'],
-    ['plectrums', 'Plectrums'],
-    ['gitaarbanden', 'Gitaarbanden'],
-    ['tassen', 'Gigbags & tassen'],
-    ['koffers', 'Koffers'],
-    ['stemapparaten', 'Stemapparaten & metronomen'],
-    ['capos', "Capo's & slides"],
-    ['standaards', 'Standaards & muurhouders'],
-    ['onderhoud', 'Onderhoud & reiniging'],
-  ]),
-  cat('onderdelen', 'Onderdelen', 'Onderdelen en gereedschap voor bouwer en reparateur', 'tool', 90, [
-    ['pickups', 'Pickups'],
-    ['stemmechanieken', 'Stemmechanieken'],
-    ['bruggen-zadels', 'Bruggen, kammen & zadels'],
-    ['elektronica', 'Potmeters & elektronica'],
-    ['gereedschap', 'Luthiergereedschap'],
-  ]),
-]
+interface RawCatalog {
+  categories: Category[]
+  brands: { id: string; name: string; count: number }[]
+}
+const data = raw as unknown as RawCatalog
+
+export const categories: Category[] = data.categories
 
 export const subById: Record<string, SubCategory> = Object.fromEntries(
-  categories.flatMap((c) => c.children).map((s) => [s.id, s]),
+  categories.flatMap((c) => c.children).map((s) => [`${s.parent}/${s.id}`, s]),
 )
 export const catById: Record<string, Category> = Object.fromEntries(categories.map((c) => [c.id, c]))
 
-export const brands: Brand[] = [
+/** Redactionele merkinformatie; merken zonder entry krijgen een generieke beschrijving. */
+const curated: Omit<Brand, 'count'>[] = [
   { id: 'boston', name: 'Boston', house: true, tagline: 'De complete basis voor elke muzikant',
     story: 'Boston Musical Products is het brede huismerk van The Music Alliance: van stemapparaten en standaards tot studie-instrumenten en onderdelen. Betrouwbare kwaliteit voor een eerlijke prijs, ontwikkeld met feedback van duizenden dealers.',
     color: '#1d4e89' },
@@ -149,5 +66,17 @@ export const brands: Brand[] = [
     story: 'Hosco Japan levert precisiegereedschap voor gitaarbouwers en reparateurs: fretvijlen, radiusblokken, meetinstrumenten en meer.',
     color: '#24563f' },
 ]
+
+const curatedById = Object.fromEntries(curated.map((b) => [b.id, b]))
+const palette = ['#1d4e89', '#7a3e1d', '#2f6b47', '#9b2335', '#5b3a29', '#24563f', '#3c3f44', '#0f6e7a', '#8c5a2b', '#4a3b7a']
+
+export const brands: Brand[] = data.brands.map((b, i) => {
+  const c = curatedById[b.id]
+  return c
+    ? { ...c, name: b.name, count: b.count }
+    : { id: b.id, name: b.name, count: b.count, house: false, color: palette[i % palette.length],
+        tagline: `${b.count} artikelen in het TMA-assortiment`,
+        story: `${b.name} is verkrijgbaar via het Europese distributienetwerk van The Music Alliance.` }
+})
 
 export const brandById: Record<string, Brand> = Object.fromEntries(brands.map((b) => [b.id, b]))

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { frequentlyBoughtWith, productById } from '../data/catalog'
-import ProductArt from '../components/ProductArt'
+import ProductImage from '../components/ProductImage'
 import Icon from '../components/Icon'
 import Rail from '../components/Rail'
 import { Breadcrumbs, Empty, FreeShippingBar, StockLine } from '../components/bits'
@@ -53,10 +53,10 @@ export default function CartPage() {
               const v = p.variants.find((x) => x.label === l.variant) ?? p.variants[0]
               return (
                 <li key={l.id + l.variant} className="cart-line">
-                  <Link to={`/product/${p.slug}`} className="cl-art" style={{ ['--tint' as string]: v.color }}><ProductArt kind={p.kind} color={v.color} /></Link>
+                  <Link to={`/product/${p.slug}`} className="cl-art" style={{ ['--tint' as string]: v.color }}><ProductImage p={p} size={220} color={v.color} /></Link>
                   <div className="cl-info">
                     <Link to={`/product/${p.slug}`} className="cl-name">{p.name}</Link>
-                    <span className="muted">Afwerking: {v.label} · {money(p.price)} per stuk</span>
+                    <span className="muted">Art.nr. {p.sku} · {money(p.price)} per stuk</span>
                     <StockLine p={p} />
                     <div className="cl-actions">
                       <button className="link-btn" onClick={() => { toggleWish(p.id); remove(l.id, l.variant) }}>Naar verlanglijst</button>

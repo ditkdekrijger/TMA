@@ -3,15 +3,15 @@ import Listing from '../components/Listing'
 import { Breadcrumbs } from '../components/bits'
 import { useTitle } from '../lib/useTitle'
 
-const deals = products.filter((p) => p.oldPrice)
+const fresh = products.filter((p) => p.isNew)
 
-export default function DealsPage() {
-  useTitle('Aanbiedingen')
+export default function NewPage() {
+  useTitle('Nieuw binnen')
   return (
     <div className="wrap page">
-      <Breadcrumbs items={[{ label: 'Aanbiedingen' }]} />
-      <header className="page-head deals-head"><div><p className="eyebrow">Zolang de voorraad strekt</p><h1>Aanbiedingen</h1><p>{deals.length} instrumenten en accessoires met korting tot {Math.max(...deals.map((p) => Math.round((1 - p.price / p.oldPrice!) * 100)))}%.</p></div></header>
-      <Listing items={deals} />
+      <Breadcrumbs items={[{ label: 'Nieuw binnen' }]} />
+      <header className="page-head deals-head"><div><p className="eyebrow">Vers uit de TMA-catalogus</p><h1>Nieuw binnen</h1><p>{fresh.length.toLocaleString('nl-NL')} nieuwe instrumenten, accessoires en onderdelen.</p></div></header>
+      <Listing items={fresh} />
     </div>
   )
 }

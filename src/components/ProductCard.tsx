@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { brandById, subById } from '../data/catalog'
+import { brandById } from '../data/catalog'
 import type { Product } from '../data/types'
 import { useStore } from '../state/store'
 import Icon from './Icon'
-import ProductArt from './ProductArt'
+import ProductImage from './ProductImage'
 import { Price, Stars, StockLine } from './bits'
 
 export default function ProductCard({ p, layout = 'grid' }: { p: Product; layout?: 'grid' | 'list' }) {
@@ -18,21 +18,22 @@ export default function ProductCard({ p, layout = 'grid' }: { p: Product; layout
     <article className={`card card-${layout}`}>
       <div className="card-media">
         <Link to={`/product/${p.slug}`} aria-label={p.name} className="card-art" style={{ ['--tint' as string]: variant.color }}>
-          <ProductArt kind={p.kind} color={variant.color} title={p.name} />
+          <ProductImage p={p} size={400} color={variant.color} />
         </Link>
         <div className="card-badges">
           {pct > 0 && <span className="badge badge-sale">-{pct}%</span>}
           {p.isNew && <span className="badge badge-new">Nieuw</span>}
-          {brandById[p.brand].house && <span className="badge badge-house">TMA-huismerk</span>}
+          {brandById[p.brand]?.house && <span className="badge badge-house">TMA-huismerk</span>}
         </div>
         <button className={`icon-btn wish ${wished ? 'on' : ''}`} onClick={() => toggleWish(p.id)} aria-pressed={wished} aria-label={wished ? 'Verwijder van verlanglijst' : 'Zet op verlanglijst'}>
           <Icon name="heart" size={18} fill={wished} />
         </button>
       </div>
       <div className="card-body">
-        <div className="card-meta"><span className="card-brand">{brandById[p.brand].name}</span><span className="card-sub">{subById[p.sub].name}</span></div>
+        <div className="card-meta"><span className="card-brand">{brandById[p.brand]?.name}</span><span className="card-sub">{p.leaf}</span></div>
         <h3 className="card-title"><Link to={`/product/${p.slug}`}>{p.name}</Link></h3>
-        <Stars value={p.rating} count={p.reviews} />
+        {p.reviews > 0 && <Stars value={p.rating} count={p.reviews} />}
+        <span className="card-sku">Art.nr. {p.sku}</span>
         {p.variants.length > 1 && (
           <div className="swatches" role="radiogroup" aria-label="Afwerking">
             {p.variants.slice(0, 6).map((x, i) => (

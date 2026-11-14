@@ -21,7 +21,7 @@ export default function BrandPage() {
           <p className="lead">{b.tagline}</p>
           <p>{b.story}</p>
         </div>
-        <div className="brand-hero-stat"><b>{items.length}</b><span>producten</span></div>
+        <div className="brand-hero-stat"><b>{items.length}</b><span>artikelen</span></div>
       </header>
       <Listing key={b.id} items={items} hideFacets={['brand']} />
     </div>

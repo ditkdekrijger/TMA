@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { brands, categories, search, subById, brandById } from '../data/catalog'
+import { brands, categories, search, brandById } from '../data/catalog'
 import { money } from '../lib/format'
 import Icon from './Icon'
-import ProductArt from './ProductArt'
+import ProductImage from './ProductImage'
 
-const POPULAR = ['ukulele', 'digitale piano', 'cajon', 'klassieke gitaar 3/4', 'NUX pedaal', 'snaren']
+const POPULAR = ['ukulele', 'klassieke gitaar', 'cajon', 'Richwood', 'saxofoon', 'snaren', 'Rotosound']
 
 export default function SearchBox({ onDone }: { onDone?: () => void }) {
   const [q, setQ] = useState('')
@@ -16,7 +16,7 @@ export default function SearchBox({ onDone }: { onDone?: () => void }) {
 
   const results = useMemo(() => (q.trim().length >= 2 ? search(q).slice(0, 6) : []), [q])
   const lower = q.trim().toLowerCase()
-  const brandHits = lower.length >= 2 ? brands.filter((b) => b.name.toLowerCase().includes(lower)).slice(0, 3) : []
+  const brandHits = lower.length >= 2 ? brands.filter((b) => b.name.toLowerCase().includes(lower)).slice(0, 4) : []
   const subHits = lower.length >= 2 ? categories.flatMap((c) => c.children).filter((s) => s.name.toLowerCase().includes(lower)).slice(0, 4) : []
 
   useEffect(() => {
@@ -76,8 +76,8 @@ export default function SearchBox({ onDone }: { onDone?: () => void }) {
                   {results.map((p, i) => (
                     <li key={p.id} role="option" aria-selected={i === active}>
                       <button className={i === active ? 'on' : ''} onClick={() => go(`/product/${p.slug}`)} onMouseEnter={() => setActive(i)}>
-                        <span className="sr-art"><ProductArt kind={p.kind} color={p.variants[0].color} /></span>
-                        <span className="sr-text"><b>{p.name}</b><small>{brandById[p.brand].name} · {subById[p.sub].name}</small></span>
+                        <span className="sr-art"><ProductImage p={p} size={100} /></span>
+                        <span className="sr-text"><b>{p.name}</b><small>{brandById[p.brand]?.name} · {p.leaf} · {p.sku}</small></span>
                         <span className="sr-price">{money(p.price)}</span>
                       </button>
                     </li>

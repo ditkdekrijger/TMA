@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { brandById, productById } from '../data/catalog'
-import ProductArt from '../components/ProductArt'
+import ProductImage from '../components/ProductImage'
 import Icon from '../components/Icon'
-import { Breadcrumbs, Empty, Price, Stars, StockLine } from '../components/bits'
+import { Breadcrumbs, Empty, Price, StockLine } from '../components/bits'
 import { useStore } from '../state/store'
 import { useTitle } from '../lib/useTitle'
 
@@ -23,15 +23,15 @@ export default function ComparePage() {
             <tr><th />{items.map((p) => (
               <th key={p.id}>
                 <button className="icon-btn cmp-x" onClick={() => toggleCompare(p.id)} aria-label="Verwijder"><Icon name="close" size={16} /></button>
-                <Link to={`/product/${p.slug}`} className="cmp-art"><ProductArt kind={p.kind} color={p.variants[0].color} /></Link>
+                <Link to={`/product/${p.slug}`} className="cmp-art"><ProductImage p={p} size={300} /></Link>
                 <Link to={`/product/${p.slug}`} className="cmp-name">{p.name}</Link>
                 <Price value={p.price} old={p.oldPrice} />
                 <button className="btn btn-primary btn-sm" onClick={() => add(p.id, p.variants[0].label)}>In winkelwagen</button>
               </th>))}</tr>
           </thead>
           <tbody>
-            <tr><th>Merk</th>{items.map((p) => <td key={p.id}>{brandById[p.brand].name}</td>)}</tr>
-            <tr><th>Beoordeling</th>{items.map((p) => <td key={p.id}><Stars value={p.rating} count={p.reviews} /></td>)}</tr>
+            <tr><th>Merk</th>{items.map((p) => <td key={p.id}>{brandById[p.brand]?.name}</td>)}</tr>
+            <tr><th>Omschrijving</th>{items.map((p) => <td key={p.id}>{p.description}</td>)}</tr>
             <tr><th>Levering</th>{items.map((p) => <td key={p.id}><StockLine p={p} /></td>)}</tr>
             <tr><th>Niveau</th>{items.map((p) => <td key={p.id}>{p.level}</td>)}</tr>
             {keys.map((k) => {

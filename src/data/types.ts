@@ -27,6 +27,7 @@ export interface SubCategory {
 export interface Brand {
   id: string
   name: string
+  count: number
   house: boolean
   since?: string
   tagline: string
@@ -41,6 +42,17 @@ export interface Variant {
 
 export interface Product {
   id: string
+  /** Pad naar de TMA-productfoto (relatief aan imageBase) */
+  image?: string
+  images?: string[]
+  ean?: string
+  features?: string[]
+  /** Diepste TMA-categorie, bv. "Akoestische drumkits" */
+  leaf: string
+  /** true = richtprijs (geen dealerprijs bekend) */
+  priceEstimated: boolean
+  /** TMA-product-URL */
+  sourceUrl?: string
   sku: string
   slug: string
   name: string
@@ -52,7 +64,8 @@ export interface Product {
   oldPrice?: number
   rating: number
   reviews: number
-  stock: number
+  /** undefined = voorraad onbekend (geen dealerfeed) */
+  stock?: number
   isNew: boolean
   kind: ArtKind
   variants: Variant[]

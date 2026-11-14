@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { productById } from '../data/catalog'
-import ProductArt from '../components/ProductArt'
+import ProductImage from '../components/ProductImage'
 import Icon from '../components/Icon'
 import { Empty } from '../components/bits'
 import { Summary } from './CartPage'
@@ -50,7 +50,7 @@ export default function CheckoutPage() {
   }
   const valid = Object.values(errors).every((x) => !x)
   const err = (k: keyof Form) => (touched && errors[k] ? <span className="err">{errors[k]}</span> : null)
-  const inStock = cart.every((l) => productById[l.id].stock > 0)
+  const inStock = cart.every((l) => (productById[l.id].stock ?? 1) > 0)
   const eta = deliveryEstimate(inStock, new Date(), shop.cutoffHour)
 
   const field = (k: keyof Form, label: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => (
@@ -141,7 +141,7 @@ export default function CheckoutPage() {
               {cart.map((l) => {
                 const p = productById[l.id]
                 const v = p.variants.find((x) => x.label === l.variant) ?? p.variants[0]
-                return <li key={l.id + l.variant}><span className="mc-art"><ProductArt kind={p.kind} color={v.color} /><i>{l.qty}</i></span><span>{p.name}<small>{v.label}</small></span><b>{money(p.price * l.qty)}</b></li>
+                return <li key={l.id + l.variant}><span className="mc-art"><ProductImage p={p} size={120} color={v.color} /><i>{l.qty}</i></span><span>{p.name}<small>Art.nr. {p.sku}</small></span><b>{money(p.price * l.qty)}</b></li>
               })}
             </ul>
             <Link to="/winkelwagen" className="link-btn">Winkelwagen aanpassen</Link>

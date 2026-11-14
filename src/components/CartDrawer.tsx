@@ -4,7 +4,7 @@ import { frequentlyBoughtWith, productById } from '../data/catalog'
 import { money } from '../lib/format'
 import { useStore } from '../state/store'
 import Icon from './Icon'
-import ProductArt from './ProductArt'
+import ProductImage from './ProductImage'
 import { FreeShippingBar } from './bits'
 
 export function QtyStepper({ value, onChange, label }: { value: number; onChange: (n: number) => void; label: string }) {
@@ -46,10 +46,10 @@ export default function CartDrawer() {
                   const v = p.variants.find((x) => x.label === l.variant) ?? p.variants[0]
                   return (
                     <li key={l.id + l.variant}>
-                      <Link to={`/product/${p.slug}`} onClick={() => setDrawer(false)} className="mc-art"><ProductArt kind={p.kind} color={v.color} /></Link>
+                      <Link to={`/product/${p.slug}`} onClick={() => setDrawer(false)} className="mc-art"><ProductImage p={p} size={140} color={v.color} /></Link>
                       <div className="mc-info">
                         <Link to={`/product/${p.slug}`} onClick={() => setDrawer(false)}>{p.name}</Link>
-                        <small>{v.label}</small>
+                        <small>Art.nr. {p.sku}</small>
                         <QtyStepper value={l.qty} onChange={(n) => setQty(l.id, l.variant, n)} label={p.name} />
                       </div>
                       <b>{money(p.price * l.qty)}</b>
@@ -62,7 +62,7 @@ export default function CartDrawer() {
                   <h3>Maak het compleet</h3>
                   {upsell.map((p) => (
                     <div key={p.id} className="upsell-item">
-                      <span className="mc-art"><ProductArt kind={p.kind} color={p.variants[0].color} /></span>
+                      <span className="mc-art"><ProductImage p={p} size={100} /></span>
                       <span className="upsell-name">{p.name}<small>{money(p.price)}</small></span>
                       <button className="btn btn-ghost btn-sm" onClick={() => add(p.id, p.variants[0].label)} aria-label={`Voeg ${p.name} toe`}><Icon name="plus" size={16} /></button>
                     </div>

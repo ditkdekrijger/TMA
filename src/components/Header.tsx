@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { brands, categories, productsInSub } from '../data/catalog'
+import { brands, categories, productsInSub, stats, subKey } from '../data/catalog'
 import { shop } from '../lib/config'
 import { useStore } from '../state/store'
 import Icon from './Icon'
@@ -39,7 +39,7 @@ export default function Header() {
           <span><Icon name="truck" size={16} /> Voor {shop.cutoffHour}:00 besteld, morgen in huis</span>
           <span><Icon name="return" size={16} /> {shop.returnDays} dagen bedenktijd</span>
           <span className="hide-sm"><Icon name="check" size={16} /> Gratis verzending vanaf € {shop.freeShippingFrom}</span>
-          <span className="hide-md"><Icon name="store" size={16} /> 16.000+ producten uit het TMA-assortiment</span>
+          <span className="hide-md"><Icon name="store" size={16} /> {stats.products.toLocaleString('nl-NL')} artikelen uit het TMA-assortiment</span>
         </div>
       </div>
       <div className="wrap head-main">
@@ -67,7 +67,7 @@ export default function Header() {
             </NavLink>
           ))}
           <NavLink to="/merken" className="cat-link cat-link-alt" onMouseEnter={() => setMega(null)}>Merken</NavLink>
-          <NavLink to="/aanbiedingen" className="cat-link cat-link-sale" onMouseEnter={() => setMega(null)}>Aanbiedingen</NavLink>
+          <NavLink to="/nieuw" className="cat-link cat-link-sale" onMouseEnter={() => setMega(null)}>Nieuw</NavLink>
         </div>
         {active && (
           <div className="mega" onMouseEnter={() => setMega(active.id)}>
@@ -76,7 +76,7 @@ export default function Header() {
                 <h3><Link to={`/c/${active.id}`}>{active.name} <Icon name="chevron" size={16} /></Link></h3>
                 <ul>
                   {active.children.map((s) => (
-                    <li key={s.id}><Link to={`/c/${active.id}/${s.id}`}>{s.name} <small>{productsInSub(s.id).length}</small></Link></li>
+                    <li key={s.id}><Link to={`/c/${active.id}/${s.id}`}>{s.name} <small>{productsInSub(subKey(s)).length}</small></Link></li>
                   ))}
                 </ul>
               </div>
@@ -112,7 +112,7 @@ export default function Header() {
                   </li>
                 ))}
                 <li><Link className="m-cat" to="/merken">Merken ({brands.length})</Link></li>
-                <li><Link className="m-cat" to="/aanbiedingen">Aanbiedingen</Link></li>
+                <li><Link className="m-cat" to="/nieuw">Nieuw binnen</Link></li>
                 <li><Link className="m-cat" to="/keuzehulp">Keuzehulp</Link></li>
                 <li><Link className="m-cat" to="/vergelijk">Vergelijken</Link></li>
                 <li><Link className="m-cat" to="/service">Klantenservice</Link></li>

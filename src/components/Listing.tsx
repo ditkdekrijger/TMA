@@ -6,10 +6,10 @@ import { money } from '../lib/format'
 import Icon from './Icon'
 import ProductCard from './ProductCard'
 
-type SortKey = 'relevant' | 'popular' | 'price-asc' | 'price-desc' | 'rating' | 'new'
+type SortKey = 'relevant' | 'price-asc' | 'price-desc' | 'new' | 'name'
 const SORTS: [SortKey, string][] = [
-  ['relevant', 'Meest relevant'], ['popular', 'Populariteit'], ['price-asc', 'Prijs laag – hoog'],
-  ['price-desc', 'Prijs hoog – laag'], ['rating', 'Beste beoordeling'], ['new', 'Nieuwste'],
+  ['relevant', 'Meest relevant'], ['new', 'Nieuwste'], ['price-asc', 'Prijs laag – hoog'],
+  ['price-desc', 'Prijs hoog – laag'], ['name', 'Naam A – Z'],
 ]
 const PAGE = 24
 const LEVELS: Product['level'][] = ['Beginner', 'Gevorderd', 'Professional']
@@ -35,11 +35,13 @@ export default function Listing({ items, hideFacets = [] }: { items: Product[]; 
 
   const getList = (k: string) => (sp.get(k) ? sp.get(k)!.split(',') : [])
   const selSubs = getList('type')
+  const selLeaf = getList('soort')
   const selBrands = getList('merk')
   const selLevels = getList('niveau')
   const selPrice = getList('prijs')
   const inStock = sp.get('voorraad') === '1'
   const onSale = sp.get('actie') === '1'
+  const onlyNew = sp.get('nieuw') === '1'
   const minRating = Number(sp.get('score') ?? 0)
   const sort = (sp.get('sort') as SortKey) ?? 'relevant'
 
@@ -59,18 +61,19 @@ export default function Listing({ items, hideFacets = [] }: { items: Product[]; 
   const matches = (p: Product, skip?: string) =>
     (skip === 'type' || !selSubs.length || selSubs.includes(p.sub)) &&
     (skip === 'merk' || !selBrands.length || selBrands.includes(p.brand)) &&
+    (skip === 'soort' || !selLeaf.length || selLeaf.includes(p.leaf)) &&
     (skip === 'niveau' || !selLevels.length || selLevels.includes(p.level)) &&
     (skip === 'prijs' || !selPrice.length || selPrice.some((b) => { const band = PRICE_BANDS[Number(b)]; return band && p.price >= band[1] && p.price < band[2] })) &&
-    (!inStock || p.stock > 0) && (!onSale || !!p.oldPrice) && p.rating >= minRating
+    (!inStock || (p.stock ?? 1) > 0) && (!onSale || !!p.oldPrice) && (!onlyNew || p.isNew) && p.rating >= minRating
 
   const filtered = useMemo(() => {
     const out = items.filter((p) => matches(p))
     const s = [...out]
     if (sort === 'price-asc') s.sort((a, b) => a.price - b.price)
     else if (sort === 'price-desc') s.sort((a, b) => b.price - a.price)
-    else if (sort === 'rating') s.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews)
-    else if (sort === 'new') s.sort((a, b) => b.addedAt - a.addedAt)
-    else if (sort === 'popular') s.sort((a, b) => b.reviews - a.reviews)
+    else if (sort === 'name') s.sort((a, b) => a.name.localeCompare(b.name, 'nl'))
+    else if (sort === 'new') s.sort((a, b) => Number(b.isNew) - Number(a.isNew) || b.addedAt - a.addedAt)
+    else s.sort((a, b) => Number(!!b.image) - Number(!!a.image))
     return s
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, sp])
@@ -78,13 +81,23 @@ export default function Listing({ items, hideFacets = [] }: { items: Product[]; 
   const count = (key: string, pred: (p: Product) => boolean) => items.filter((p) => matches(p, key) && pred(p)).length
   const facetValues = (key: 'sub' | 'brand') => {
     const ids = [...new Set(items.map((p) => p[key]))]
-    return ids.map((id) => ({ id, label: key === 'sub' ? subById[id].name : brandById[id].name, n: count(key === 'sub' ? 'type' : 'merk', (p) => p[key] === id) }))
+    return ids.map((id) => ({ id, label: key === 'sub' ? subById[id]?.name ?? id : brandById[id]?.name ?? id, n: count(key === 'sub' ? 'type' : 'merk', (p) => p[key] === id) }))
       .sort((a, b) => b.n - a.n)
   }
+
+  const leafValues = [...new Set(items.map((p) => p.leaf))].map((l) => ({ id: l, n: count('soort', (p) => p.leaf === l) })).sort((a, b) => b.n - a.n)
+  const hasRatings = items.some((p) => p.reviews > 0)
+  const hasSale = items.some((p) => p.oldPrice)
+  const hasNew = items.some((p) => p.isNew)
+  const hasStock = items.some((p) => p.stock !== undefined)
+  const [brandQuery, setBrandQuery] = useState('')
+  const [showAllLeaf, setShowAllLeaf] = useState(false)
 
   const chips: { label: string; clear: () => void }[] = [
     ...selSubs.map((s) => ({ label: subById[s]?.name ?? s, clear: () => toggle('type', s) })),
     ...selBrands.map((b) => ({ label: brandById[b]?.name ?? b, clear: () => toggle('merk', b) })),
+    ...selLeaf.map((l) => ({ label: l, clear: () => toggle('soort', l) })),
+    ...(onlyNew ? [{ label: 'Nieuw', clear: () => update('nieuw', null) }] : []),
     ...selLevels.map((l) => ({ label: l, clear: () => toggle('niveau', l) })),
     ...selPrice.map((b) => ({ label: PRICE_BANDS[Number(b)]?.[0] ?? b, clear: () => toggle('prijs', b) })),
     ...(inStock ? [{ label: 'Op voorraad', clear: () => update('voorraad', null) }] : []),
@@ -105,9 +118,18 @@ export default function Listing({ items, hideFacets = [] }: { items: Product[]; 
           ))}
         </Facet>
       )}
+      {leafValues.length > 1 && (
+        <Facet title="Soort">
+          {(showAllLeaf ? leafValues : leafValues.slice(0, 10)).map((f) => (
+            <label key={f.id} className={`check ${f.n === 0 ? 'dim' : ''}`}><input type="checkbox" checked={selLeaf.includes(f.id)} onChange={() => toggle('soort', f.id)} /> {f.id}<small>{f.n}</small></label>
+          ))}
+          {leafValues.length > 10 && <button className="link-btn" onClick={() => setShowAllLeaf((x) => !x)}>{showAllLeaf ? 'Minder tonen' : `Toon alle ${leafValues.length}`}</button>}
+        </Facet>
+      )}
       {!hideFacets.includes('brand') && facetValues('brand').length > 1 && (
         <Facet title="Merk">
-          {facetValues('brand').map((f) => (
+          {facetValues('brand').length > 8 && <input className="facet-search" placeholder="Zoek merk" value={brandQuery} onChange={(e) => setBrandQuery(e.target.value)} aria-label="Zoek merk" />}
+          {facetValues('brand').filter((f) => f.label.toLowerCase().includes(brandQuery.toLowerCase())).slice(0, brandQuery ? 50 : 12).map((f) => (
             <label key={f.id} className={`check ${f.n === 0 ? 'dim' : ''}`}><input type="checkbox" checked={selBrands.includes(f.id)} onChange={() => toggle('merk', f.id)} /> {f.label}<small>{f.n}</small></label>
           ))}
         </Facet>
@@ -126,16 +148,17 @@ export default function Listing({ items, hideFacets = [] }: { items: Product[]; 
           return <label key={l} className={`check ${n === 0 ? 'dim' : ''}`}><input type="checkbox" checked={selLevels.includes(l)} onChange={() => toggle('niveau', l)} /> {l}<small>{n}</small></label>
         })}
       </Facet>
-      <Facet title="Beoordeling">
+      {hasRatings && <Facet title="Beoordeling">
         {[4.5, 4].map((r) => (
           <label key={r} className="check"><input type="radio" name="score" checked={minRating === r} onChange={() => update('score', String(r))} /> {r.toLocaleString('nl-NL')} sterren of meer</label>
         ))}
         {minRating > 0 && <button className="link-btn" onClick={() => update('score', null)}>Wis</button>}
-      </Facet>
-      <Facet title="Beschikbaarheid">
-        <label className="toggle"><input type="checkbox" checked={inStock} onChange={() => update('voorraad', inStock ? null : '1')} /><span /> Direct leverbaar</label>
-        <label className="toggle"><input type="checkbox" checked={onSale} onChange={() => update('actie', onSale ? null : '1')} /><span /> In de aanbieding</label>
-      </Facet>
+      </Facet>}
+      {(hasStock || hasNew || hasSale) && <Facet title="Beschikbaarheid">
+        {hasStock && <label className="toggle"><input type="checkbox" checked={inStock} onChange={() => update('voorraad', inStock ? null : '1')} /><span /> Direct leverbaar</label>}
+        {hasNew && <label className="toggle"><input type="checkbox" checked={onlyNew} onChange={() => update('nieuw', onlyNew ? null : '1')} /><span /> Alleen nieuw</label>}
+        {hasSale && <label className="toggle"><input type="checkbox" checked={onSale} onChange={() => update('actie', onSale ? null : '1')} /><span /> In de aanbieding</label>}
+      </Facet>}
     </>
   )
 

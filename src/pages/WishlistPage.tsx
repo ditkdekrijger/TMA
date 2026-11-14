@@ -17,7 +17,7 @@ export default function WishlistPage() {
     <div className="wrap page">
       <Breadcrumbs items={[{ label: 'Verlanglijst' }]} />
       <header className="page-head"><div><h1>Mijn verlanglijst</h1><p>{items.length} producten · totaal {money(items.reduce((s, p) => s + p.price, 0))}</p></div>
-        {items.length > 0 && <div className="row-gap"><button className="btn btn-ghost" onClick={share}>Deel lijst</button><button className="btn btn-primary" onClick={() => items.forEach((p) => p.stock > 0 && add(p.id, p.variants[0].label))}>Alles in winkelwagen</button></div>}
+        {items.length > 0 && <div className="row-gap"><button className="btn btn-ghost" onClick={share}>Deel lijst</button><button className="btn btn-primary" onClick={() => items.forEach((p) => (p.stock ?? 1) > 0 && add(p.id, p.variants[0].label))}>Alles in winkelwagen</button></div>}
       </header>
       {items.length ? <div className="grid">{items.map((p) => <ProductCard key={p.id} p={p} />)}</div>
         : <Empty title="Je verlanglijst is nog leeg" text="Klik op het hartje bij een product om het te bewaren voor later — handig voor je verjaardag of Sinterklaas!" cta={{ label: 'Ontdek producten', to: '/' }} />}

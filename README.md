@@ -1,9 +1,8 @@
 # Klankhuis — webshop voor muziekinstrumenten (TMA-assortiment)
 
-Een complete, snelle webshop-frontend voor muziekinstrumenten en accessoires, opgebouwd rond de merken en
-productgroepen van **The Music Alliance** (TMA): de Europese distributiecoöperatie met 16.000+ producten van
-200+ merken en eigen merken als Boston, Richwood, Korala, Salvador Cortez, Mayson, Gaucho, Hayman,
-Stewart Ellis, GLX en Gatt Audio, plus exclusieve merken als NUX, Medeli, Crumar, Agner, Rotosound en Hosco.
+Een complete, snelle webshop-frontend voor muziekinstrumenten en accessoires, gevuld met de **echte productcatalogus
+van The Music Alliance** (TMA): artikelnummers, merken, series, Nederlandse omschrijvingen, categorieën en
+productfoto's, opgehaald uit de publieke online catalogus van een TMA-partner (themusicalliance.co.uk, NL-taal).
 
 ## Starten
 
@@ -14,40 +13,63 @@ npm run build        # productiebuild in dist/
 npm run build:single # alles in één HTML-bestand (dist-single/index.html)
 ```
 
+## Catalogus bijwerken
+
+```bash
+python3 scripts/scrape_tma.py --new        # categorieën + productoverzichten + 'nieuw'-markering (~15 min)
+python3 scripts/scrape_tma.py --details-only  # optioneel: EAN, kenmerken en extra foto's per product (~9.000 pagina's, ±2 uur)
+python3 scripts/build_catalog.py           # → src/data/generated/catalog.json
+npm run build
+```
+
+De scraper gebruikt alleen de Python-standaardbibliotheek, crawlt bewust rustig (2 parallelle verzoeken met pauze)
+en cachet alles in `data/tma/cache/`, zodat een onderbroken run hervat. Ruwe data: `data/tma/catalog.json`.
+
+### Prijzen en voorraad
+
+Prijzen en voorraad staan in de TMA-catalogus achter de dealerlogin en worden dus **niet** gescrapet.
+Zet een dealerprijslijst neer als `data/tma/prices.csv`:
+
+```
+sku;price;stock
+RD-12-BUS;179.00;12
+SE-710-L;749.00;3
+```
+
+en draai `build_catalog.py` opnieuw. Zonder prijslijst toont de shop per productgroep een **richtprijs**
+(duidelijk gemarkeerd als “Richtprijs” op de productpagina en in de footer) en “Leverbaar” zonder voorraadaantal.
+
 ## Wat zit erin
 
 | Onderdeel | Functies |
 |---|---|
 | **Navigatie** | Megamenu per categorie, mobiel menu, live zoeken met suggesties (producten, categorieën, merken), toetsenbordbediening |
-| **Assortiment** | 10 hoofdcategorieën, 63 subcategorieën, 16 merken, 298 producten met afwerkingsvarianten |
-| **Productoverzicht** | Filters (type, merk, prijs, niveau, score, voorraad, actie) met live tellingen, filters in de URL (deelbaar), 6 sorteringen, raster/lijst, ‘meer laden’ |
-| **Productpagina** | Varianten met kleurwissel, voorraad + verwachte bezorgdatum, ‘vaak samen gekocht’-bundel, specificaties, reviews met verdeling, vergelijkbare en recent bekeken producten, sticky koopbalk op mobiel, schema.org-structured data |
+| **Assortiment** | Volledige TMA-catalogus: 12 hoofdcategorieën, subcategorieën en ‘soort’ per artikel, alle merken, echte foto’s (met SVG-terugval) |
+| **Productoverzicht** | Filters (type, soort, merk met zoekveld, prijs, niveau, nieuw) met live tellingen, filters in de URL (deelbaar), 6 sorteringen, raster/lijst, ‘meer laden’ |
+| **Productpagina** | Productfoto’s, artikelnummer/EAN, kenmerken, ‘vaak samen gekocht’-bundel, specificaties, vergelijkbare en recent bekeken producten, sticky koopbalk op mobiel, schema.org-structured data |
 | **Conversie** | Winkelwagen-drawer met upsell, voortgangsbalk gratis verzending, kortingscodes (`WELKOM10`, `MUZIEK5`), verlanglijst (deelbaar), vergelijken (max. 4, verschillen gemarkeerd) |
-| **Keuzehulp** | 4 vragen (instrument, voor wie, niveau, budget) → persoonlijk advies + bijpassende accessoires |
+| **Keuzehulp** | 3 vragen (instrument, voor wie, budget) → persoonlijk advies + bijpassende accessoires |
 | **Afrekenen** | 3 stappen (gegevens, bezorging, betaling) met NL/BE-postcodevalidatie, iDEAL/Bancontact/creditcard/PayPal/Klarna, bevestigingspagina |
-| **Overig** | Merkenoverzicht A-Z + merkpagina's, aanbiedingenpagina, klantenservice/FAQ, nieuwsbrief, licht/donker thema, volledig responsive |
+| **Overig** | Merkenoverzicht A-Z + merkpagina's, ‘Nieuw binnen’, klantenservice/FAQ, nieuwsbrief, licht/donker thema, volledig responsive |
 
 ## Structuur
 
 ```
-src/
-  data/taxonomy.ts   categorieën + merken
-  data/lines.ts      productlijnen per subcategorie (uitgevouwen tot producten)
-  data/catalog.ts    catalogus, zoeken, gerelateerd, ‘vaak samen gekocht’
-  state/store.tsx    winkelwagen, verlanglijst, vergelijken, recent bekeken (localStorage)
-  lib/config.ts      winkelnaam, verzendkosten, drempels — hier aanpassen
-  components/        header, zoekbalk, productkaart, filters, drawer, SVG-productillustraties
-  pages/             alle pagina's
+scripts/scrape_tma.py       scraper TMA-catalogus (NL)
+scripts/build_catalog.py    ruwe data → compacte shopcatalogus (mapping, richtprijzen, prijslijst)
+src/data/generated/         gegenereerde catalogus (ingelezen door de shop)
+src/data/taxonomy.ts        categorieën + redactionele merkinformatie
+src/data/catalog.ts         producten, zoeken, gerelateerd, ‘vaak samen gekocht’
+src/state/store.tsx         winkelwagen, verlanglijst, vergelijken, recent bekeken (localStorage)
+src/lib/config.ts           winkelnaam, verzendkosten, drempels — hier aanpassen
+src/components/, src/pages/ UI
 ```
 
-## Belangrijk: demodata
+## Belangrijk vóór livegang
 
-De merken, categorieën en productgroepen zijn gebaseerd op het publiek beschikbare TMA-assortiment. **Modelnummers,
-prijzen, voorraad, specificaties en reviews zijn representatieve demodata** en de productafbeeldingen zijn
-gegenereerde SVG-illustraties. Voor livegang:
-
-1. Vervang `src/data/lines.ts` door een import van de TMA-dealerfeed (artikelen, prijzen, voorraad, afbeeldingen).
-   Het `Product`-type in `src/data/types.ts` is het doelformaat.
-2. Koppel afrekenen aan een betaalprovider (bijv. Mollie of Adyen) en een orderbackend.
-3. Vervang de gegenereerde reviews door echte reviews (bijv. Kiyoh/Trustpilot).
-4. Pas winkelnaam en contactgegevens aan in `src/lib/config.ts`.
+1. **Gebruiksrecht.** Productteksten en -foto's zijn eigendom van TMA en de merken. Als TMA-dealer mag je ze
+   doorgaans gebruiken, maar leg dit vast met TMA en vraag liefst de officiële dealerfeed (met prijzen en voorraad) aan.
+2. **Foto's** worden nu rechtstreeks van de TMA-server geladen. Download ze voor productie naar eigen hosting/CDN.
+3. **Bereik.** De publieke catalogus van deze partner bevat ±9.000 artikelen; het volledige TMA-aanbod (16.000+,
+   o.a. elektrische gitaren, keyboards, PA) loopt via de Benelux-dealerportal/-feed.
+4. Koppel afrekenen aan een betaalprovider (bijv. Mollie) en een orderbackend; pas winkelgegevens aan in `src/lib/config.ts`.

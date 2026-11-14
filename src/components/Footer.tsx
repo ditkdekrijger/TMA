@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { brands, categories, stats } from '../data/catalog'
+import { brands, catalogMeta, categories, stats } from '../data/catalog'
 import { shop } from '../lib/config'
 import Icon from './Icon'
 import { Logo } from './Header'
@@ -28,7 +28,7 @@ export default function Footer() {
       <div className="wrap foot-grid">
         <div className="foot-about">
           <Logo />
-          <p>{shop.tagline}. {stats.products}+ instrumenten en accessoires online, en via ons netwerk toegang tot meer dan 16.000 producten van 200+ merken.</p>
+          <p>{shop.tagline}. {stats.products.toLocaleString('nl-NL')} instrumenten, accessoires en onderdelen van {stats.brands} merken online.</p>
           <div className="pay-row" aria-label="Betaalmethoden">
             {['iDEAL', 'Bancontact', 'Visa', 'Mastercard', 'PayPal', 'Klarna'].map((m) => <span key={m} className="pay">{m}</span>)}
           </div>
@@ -39,7 +39,7 @@ export default function Footer() {
         </div>
         <div>
           <h3>Merken</h3>
-          <ul>{brands.slice(0, 10).map((b) => <li key={b.id}><Link to={`/merk/${b.id}`}>{b.name}</Link></li>)}<li><Link to="/merken">Alle merken</Link></li></ul>
+          <ul>{brands.filter((b) => b.house).concat(brands.filter((b) => !b.house)).slice(0, 10).map((b) => <li key={b.id}><Link to={`/merk/${b.id}`}>{b.name}</Link></li>)}<li><Link to="/merken">Alle merken</Link></li></ul>
         </div>
         <div>
           <h3>Service</h3>
@@ -57,7 +57,7 @@ export default function Footer() {
       <div className="foot-bottom">
         <div className="wrap">
           <span>© {new Date().getFullYear()} {shop.name}. Alle prijzen incl. btw.</span>
-          <span className="muted">Demo-catalogus op basis van de merken en productgroepen van The Music Alliance. Prijzen, voorraad en specificaties zijn indicatief.</span>
+          <span className="muted">Productgegevens en -foto's: online catalogus van The Music Alliance. {catalogMeta.pricesFromFeed ? 'Prijzen volgens dealerprijslijst.' : 'Getoonde prijzen zijn richtprijzen (demo).'}</span>
         </div>
       </div>
     </footer>

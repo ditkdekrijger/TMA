@@ -10,7 +10,7 @@ export default function BrandsPage() {
   return (
     <div className="wrap page">
       <Breadcrumbs items={[{ label: 'Merken' }]} />
-      <header className="page-head"><div><h1>Onze merken</h1><p>Exclusieve huismerken en topmerken uit het assortiment van The Music Alliance — de grootste distributiecoöperatie voor muziekinstrumenten in Europa.</p></div></header>
+      <header className="page-head"><div><h1>Onze merken</h1><p>{brands.length} merken uit het assortiment van The Music Alliance — de grootste distributiecoöperatie voor muziekinstrumenten in Europa.</p></div></header>
       <nav className="az" aria-label="Alfabet">{letters.map((l) => <a key={l} href={`#letter-${l}`}>{l}</a>)}</nav>
       <div className="brand-grid">
         {sorted.map((b, i) => (
@@ -18,7 +18,7 @@ export default function BrandsPage() {
             to={`/merk/${b.id}`} className="brand-card" style={{ ['--bc' as string]: b.color }}>
             <span className="bc-logo">{b.name}</span>
             <span className="bc-tag">{b.tagline}</span>
-            <span className="bc-foot">{productsOfBrand(b.id).length} producten {b.house && <span className="badge badge-house">Huismerk</span>}</span>
+            <span className="bc-foot">{productsOfBrand(b.id).length} artikelen {b.house && <span className="badge badge-house">Huismerk</span>}</span>
           </Link>
         ))}
       </div>

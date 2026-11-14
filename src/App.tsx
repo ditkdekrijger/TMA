@@ -45,6 +45,7 @@ export default function App() {
           <Route path="/zoeken" element={<SearchPage />} />
           <Route path="/merken" element={<BrandsPage />} />
           <Route path="/merk/:brand" element={<BrandPage />} />
+          <Route path="/nieuw" element={<DealsPage />} />
           <Route path="/aanbiedingen" element={<DealsPage />} />
           <Route path="/winkelwagen" element={<CartPage />} />
           <Route path="/bedankt" element={<ThanksPage />} />
