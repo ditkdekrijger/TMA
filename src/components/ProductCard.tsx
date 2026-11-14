@@ -33,7 +33,7 @@ export default function ProductCard({ p, layout = 'grid' }: { p: Product; layout
         <div className="card-meta"><span className="card-brand">{brandById[p.brand]?.name}</span><span className="card-sub">{p.leaf}</span></div>
         <h3 className="card-title"><Link to={`/product/${p.slug}`}>{p.name}</Link></h3>
         {p.reviews > 0 && <Stars value={p.rating} count={p.reviews} />}
-        <span className="card-sku">Art.nr. {p.sku}</span>
+        <span className="card-sku" title={p.description}>{p.description} · {p.sku}</span>
         {p.variants.length > 1 && (
           <div className="swatches" role="radiogroup" aria-label="Afwerking">
             {p.variants.slice(0, 6).map((x, i) => (

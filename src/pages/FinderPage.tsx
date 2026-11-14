@@ -20,6 +20,7 @@ const INSTR: { id: string; label: string; kind: ArtKind; leaf: RegExp }[] = [
 ]
 const WHO = [['kid', 'Een kind (tot 12 jaar)'], ['adult', 'Tiener of volwassene']] as const
 const BUDGET = [[0, 100, 'Tot € 100'], [100, 300, '€ 100 – 300'], [300, 800, '€ 300 – 800'], [800, Infinity, 'Vanaf € 800']] as const
+const INSTRUMENT_CATS = ['gitaren', 'folk', 'drums', 'blaas', 'strijk']
 const KID = /1\/2|1\/4|1\/8|3\/4|junior|kinder|sopraan|kids|child/i
 
 export default function FinderPage() {
@@ -29,13 +30,13 @@ export default function FinderPage() {
   const [who, setWho] = useState<string | null>(null)
   const [budget, setBudget] = useState<number | null>(null)
 
-  const counts = useMemo(() => Object.fromEntries(INSTR.map((i) => [i.id, products.filter((p) => i.leaf.test(p.leaf)).length])), [])
+  const counts = useMemo(() => Object.fromEntries(INSTR.map((i) => [i.id, products.filter((p) => i.leaf.test(p.leaf) && INSTRUMENT_CATS.includes(p.category) && !/accessoires|onderdelen|koffers|tassen|snaren|strijkstokken|toebehoren|gereedschap/.test(p.sub)).length])), [])
 
   const result = useMemo(() => {
     if (step < 3 || !instr || budget === null) return null
     const def = INSTR.find((i) => i.id === instr)!
     const [lo, hi] = BUDGET[budget]
-    let pool = products.filter((p) => def.leaf.test(p.leaf))
+    let pool = products.filter((p) => def.leaf.test(p.leaf) && INSTRUMENT_CATS.includes(p.category) && !/accessoires|onderdelen|koffers|tassen|snaren|strijkstokken|toebehoren|gereedschap/.test(p.sub))
     const inBudget = pool.filter((p) => p.price >= lo && p.price < hi)
     pool = inBudget.length ? inBudget : pool
     const score = (p: Product) =>

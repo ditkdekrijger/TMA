@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { brandById, subById } from '../data/catalog'
+import { brandById, categories, subById } from '../data/catalog'
 import type { Product } from '../data/types'
 import { money } from '../lib/format'
 import Icon from './Icon'
@@ -12,6 +12,7 @@ const SORTS: [SortKey, string][] = [
   ['price-desc', 'Prijs hoog – laag'], ['name', 'Naam A – Z'],
 ]
 const PAGE = 24
+const subOrder: Record<string, number> = Object.fromEntries(categories.flatMap((c) => c.children.map((s, i) => [`${s.parent}/${s.id}`, i])))
 const LEVELS: Product['level'][] = ['Beginner', 'Gevorderd', 'Professional']
 
 const PRICE_BANDS: [string, number, number][] = [
@@ -73,7 +74,7 @@ export default function Listing({ items, hideFacets = [] }: { items: Product[]; 
     else if (sort === 'price-desc') s.sort((a, b) => b.price - a.price)
     else if (sort === 'name') s.sort((a, b) => a.name.localeCompare(b.name, 'nl'))
     else if (sort === 'new') s.sort((a, b) => Number(b.isNew) - Number(a.isNew) || b.addedAt - a.addedAt)
-    else s.sort((a, b) => Number(!!b.image) - Number(!!a.image))
+    else s.sort((a, b) => Number(!!b.image) - Number(!!a.image) || (subOrder[a.sub] ?? 99) - (subOrder[b.sub] ?? 99) || b.price - a.price)
     return s
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, sp])

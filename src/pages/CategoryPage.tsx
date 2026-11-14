@@ -14,7 +14,7 @@ export default function CategoryPage() {
   useTitle(s?.name ?? c?.name)
   if (!c || (sub && (!s || s.parent !== c.id))) return <NotFound />
   const items = s ? productsInSub(subKey(s)) : productsInCategory(c.id)
-  const cover = items.find((p) => p.image)
+  const cover = items.filter((p) => p.image).sort((a, b) => b.price - a.price)[0]
   return (
     <div className="wrap page">
       <Breadcrumbs items={s ? [{ label: c.name, to: `/c/${c.id}` }, { label: s.name }] : [{ label: c.name }]} />

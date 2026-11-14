@@ -35,8 +35,7 @@ export function Price({ value, old, size = 'md' }: { value: number; old?: number
 
 export function StockLine({ p }: { p: Product }) {
   if (p.stock === undefined) {
-    const d = deliveryEstimate(true, new Date(Date.now() + 86400000), shop.cutoffHour)
-    return <span className="stock in">Leverbaar · uiterlijk {d.label} in huis</span>
+    return <span className="stock in">Leverbaar · 1-3 werkdagen</span>
   }
   const d = deliveryEstimate(p.stock > 0, new Date(), shop.cutoffHour)
   if (p.stock === 0) return <span className="stock out">Nabestelbaar · levering {d.label}</span>

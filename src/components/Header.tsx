@@ -7,6 +7,8 @@ import Icon from './Icon'
 import ProductArt from './ProductArt'
 import SearchBox from './SearchBox'
 
+const NAV_SHORT: Record<string, string> = { versterkers: 'Versterkers', drums: 'Drums', blaas: 'Blaas', strijk: 'Strijk', 'pro-audio': 'Pro audio', accessoires: 'Accessoires', folk: "Ukulele's & folk" }
+
 export function Logo() {
   return (
     <Link to="/" className="logo" aria-label={`${shop.name} home`}>
@@ -63,7 +65,7 @@ export default function Header() {
           {categories.map((c) => (
             <NavLink key={c.id} to={`/c/${c.id}`} className={({ isActive }) => `cat-link ${isActive ? 'active' : ''} ${mega === c.id ? 'hover' : ''}`}
               onMouseEnter={() => setMega(c.id)} onFocus={() => setMega(c.id)}>
-              {c.name}
+              {NAV_SHORT[c.id] ?? c.name}
             </NavLink>
           ))}
           <NavLink to="/merken" className="cat-link cat-link-alt" onMouseEnter={() => setMega(null)}>Merken</NavLink>

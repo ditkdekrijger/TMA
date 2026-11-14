@@ -93,15 +93,15 @@ export function related(p: Product, n = 8): Product[] {
 }
 
 /** "Vaak samen gekocht": bijpassende accessoiregroepen per instrumenttype (op trefwoord in productgroep). */
-const accessoryHints: [RegExp, string[]][] = [
-  [/gitaren|resonator|banjo|mandoline/i, ['Snaren', 'Riemen', 'Stemapparaten', 'Tassen', 'Statieven']],
-  [/ukulele/i, ['Snaren', 'Tassen', 'Stemapparaten']],
-  [/drum|snare|percussie|cajon|bongo|conga/i, ['Stokken', 'Drumvellen', 'Hoezen']],
-  [/sax|klarinet|fluit|trompet|trombone|hoorn|bugel|eufon/i, ['Rieten', 'Mondstukken', 'Onderhoud', 'Statieven']],
-  [/viol|cello|contrabas/i, ['snaren', 'Hars', 'Schoudersteunen', 'Stemapparaten']],
-  [/versterker|effect/i, ['Kabels', 'Voedingen']],
-  [/microfoon/i, ['Kabels', 'Statieven']],
-  [/accordeon/i, ['Riemen', 'Tassen']],
+const accessoryHints: [RegExp, string[], string[]][] = [
+  [/ukulele/i, ['Snaren', 'Tassen', 'Stemapparaten'], ['accessoires']],
+  [/gitaren|resonator|banjo|mandoline/i, ['Snaren', 'Riemen', 'Stemapparaten', 'Tassen', 'Statieven'], ['accessoires']],
+  [/drum|snare|percussie|cajon|bongo|conga/i, ['Stokken', 'Drumvellen', 'Hoezen'], ['drums']],
+  [/sax|klarinet|fluit|trompet|trombone|hoorn|bugel|eufon/i, ['Rieten', 'Mondstukken', 'Onderhoud', 'Statieven'], ['blaas']],
+  [/viol|cello|contrabas/i, ['snaren', 'Hars', 'Schoudersteunen', 'Stemapparaten'], ['strijk']],
+  [/versterker|effect/i, ['Kabels', 'Voedingen'], ['accessoires', 'versterkers']],
+  [/microfoon/i, ['Kabels', 'Statieven'], ['pro-audio']],
+  [/accordeon/i, ['Riemen', 'Tassen'], ['accordeons']],
 ]
 
 export function frequentlyBoughtWith(p: Product, n = 3): Product[] {
@@ -111,7 +111,7 @@ export function frequentlyBoughtWith(p: Product, n = 3): Product[] {
   for (const word of hint[1]) {
     const w = word.toLowerCase()
     const pick = products.find((q) =>
-      q.sub !== p.sub && !out.includes(q) && q.image &&
+      q.sub !== p.sub && !out.includes(q) && q.image && hint[2].includes(q.category) &&
       (q.leaf.toLowerCase().includes(w) || (subById[q.sub]?.name.toLowerCase().includes(w) ?? false)))
     if (pick) out.push(pick)
     if (out.length >= n) break

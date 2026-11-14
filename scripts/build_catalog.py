@@ -190,10 +190,21 @@ def main() -> None:
         leaf = cap(cats[pp[-1]]["name"])
         pathtxt = " / ".join(cats[x]["name"].lower() for x in pp)
         kind, rng = "strings", (9.0, 49.0)
-        for kw, k, r in RULES:
-            if kw in pathtxt:
-                kind, rng = k, r
+        # meest specifieke categorie eerst: 'mechanieken voor klassieke gitaren' is een onderdeel, geen gitaar
+        found = False
+        for node in reversed(pp):
+            nm = cats[node]["name"].lower()
+            for kw, k, r in RULES:
+                if kw in nm:
+                    kind, rng, found = k, r, True
+                    break
+            if found:
                 break
+        if not found:
+            for kw, k, r in RULES:
+                if kw in pathtxt:
+                    kind, rng = k, r
+                    break
         text = f"{p['title']} {p['description']}".lower()
         color = next((c for w, c in COLORS.items() if re.search(rf"\b{w}\b", text)), None)
         brand = (p.get("brand") or "").strip() or "Overig"
@@ -201,7 +212,7 @@ def main() -> None:
         price, stock = prices.get(p["sku"], (None, None))
         title = p["title"].strip()
         desc = p["description"].strip().rstrip(",")
-        name = f"{p['sku']} {title}".strip() if p["sku"] and p["sku"] not in title else title
+        name = title or p["sku"]
         prod = {
             "i": p["id"], "s": p["sku"], "n": name, "b": slug(brand), "se": p.get("series", ""), "c": shopcat, "u": sub,
             "l": leaf, "d": desc, "k": kind,

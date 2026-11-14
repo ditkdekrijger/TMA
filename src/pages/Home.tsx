@@ -8,10 +8,10 @@ import { useStore } from '../state/store'
 import { shop } from '../lib/config'
 
 const withImg = (list: typeof products) => list.filter((p) => p.image)
-const spread = (list: typeof products, n: number) => {
-  // verspreid over subcategorieën voor een gevarieerde rail
+const spread = (list: typeof products, n: number, key: (p: (typeof products)[number]) => string = (p) => p.leaf) => {
+  // verspreid over productgroepen voor een gevarieerde rail
   const seen = new Set<string>(); const out: typeof products = []
-  for (const p of list) { if (!seen.has(p.leaf)) { seen.add(p.leaf); out.push(p) } if (out.length >= n) break }
+  for (const p of list) { const k = key(p); if (!seen.has(k)) { seen.add(k); out.push(p) } if (out.length >= n) break }
   return out.length >= n ? out : [...out, ...list.filter((p) => !out.includes(p))].slice(0, n)
 }
 
@@ -19,7 +19,7 @@ export default function Home() {
   const { recent } = useStore()
   const fresh = spread(withImg(products.filter((p) => p.isNew)).sort((a, b) => b.addedAt - a.addedAt), 12)
   const instruments = spread(withImg(['gitaren', 'folk', 'blaas', 'strijk', 'drums'].flatMap((c) => productsInCategory(c)))
-    .filter((p) => p.price > 120).sort((a, b) => b.addedAt - a.addedAt), 12)
+    .filter((p) => p.price > 120 && !/onderdelen|koffers|tassen|accessoires/i.test(p.sub)).sort((a, b) => b.addedAt - a.addedAt), 12, (p) => `${p.category}:${p.leaf.replace(/^\d\/\d\s*/, '')}`)
   const accessories = spread(withImg(productsInCategory('accessoires')).sort((a, b) => b.addedAt - a.addedAt), 12)
   const recentItems = recent.map((id) => productById[id]).filter(Boolean)
   const house = brands.filter((b) => b.house && b.count > 0)
