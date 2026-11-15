@@ -29,8 +29,8 @@ en cachet alles in `data/tma/cache/`, zodat een onderbroken run hervat. Ruwe dat
 
 - **Gewone build** (`npm run build`): foto's worden live van de TMA-server geladen.
 - **Eigen hosting / artifact**: `python3 scripts/build_sprites.py` downloadt alle ±8.700 foto's naar
-  `data/tma/images/` (ook bruikbaar voor eigen CDN) en bundelt ze tot ±140 sprite sheets in `data/tma/sprites/`
-  (64 foto's per vel, gegroepeerd per categorie). `npm run build:single` gebruikt die sheets; publiceer de map
+  `data/tma/images/` (ook bruikbaar voor eigen CDN) en bundelt ze tot ±350 sprite sheets (600 px per foto) in `data/tma/sprites/`
+  (25 foto's per vel, gegroepeerd per categorie). `npm run build:single` gebruikt die sheets; publiceer de map
   `sprites/` naast `index.html`.
 
 ### Prijzen en voorraad
