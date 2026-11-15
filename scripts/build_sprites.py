@@ -3,10 +3,10 @@
 Downloadt alle productfoto's uit de catalogus en bundelt ze tot sprite sheets.
 
 Waarom: een Claude-artifact (en elke statische host zonder externe afbeeldingen) mag maar een beperkt
-aantal bestanden bevatten. 8.700 losse foto's passen daar niet in; ±140 sprite sheets wel.
+aantal bestanden bevatten. 8.700 losse foto's passen daar niet in; ±350 sprite sheets wel.
 
     python3 scripts/build_sprites.py            # download + sprites
-    python3 scripts/build_sprites.py --cell 256 --grid 8 --quality 78
+    python3 scripts/build_sprites.py --cell 600 --grid 5 --quality 82
 
 Output:
     data/tma/images/<id>.jpg          losse foto's (cache, ook bruikbaar voor eigen hosting)
@@ -26,11 +26,11 @@ import time
 import urllib.request
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "src" / "data" / "generated" / "catalog.json"
-IMG_DIR = ROOT / "data" / "tma" / "images"
+IMG_DIR = ROOT / "data" / "tma" / "images"  # originelen (±900 px)
 SPRITE_DIR = ROOT / "data" / "tma" / "sprites"
 OUT_MAP = ROOT / "src" / "data" / "generated" / "sprites.json"
 
@@ -43,8 +43,12 @@ for p in (os.environ.get("SSL_CERT_FILE"), "/root/.ccr/ca-bundle.crt"):
 def download(base: str, pid: str, path: str, size: int) -> bool:
     dest = IMG_DIR / f"{pid}.jpg"
     if dest.exists() and dest.stat().st_size > 500:
-        return True
-    url = f"{base}{path}?width={size}&height={size}"
+        try:
+            if size or max(Image.open(dest).size) >= 600:
+                return True
+        except Exception:  # noqa: BLE001
+            pass
+    url = f"{base}{path}" if not size else f"{base}{path}?width={size}&height={size}"
     for attempt in range(4):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; catalog-sync/1.0)"})
@@ -63,9 +67,9 @@ def download(base: str, pid: str, path: str, size: int) -> bool:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--cell", type=int, default=256)
-    ap.add_argument("--grid", type=int, default=8)
-    ap.add_argument("--quality", type=int, default=78)
+    ap.add_argument("--cell", type=int, default=600)
+    ap.add_argument("--grid", type=int, default=5)
+    ap.add_argument("--quality", type=int, default=82)
     ap.add_argument("--workers", type=int, default=4)
     a = ap.parse_args()
 
@@ -80,7 +84,7 @@ def main() -> None:
     print(f"Foto's downloaden: {len(prods)}")
     ok: dict[str, bool] = {}
     with cf.ThreadPoolExecutor(a.workers) as ex:
-        futs = {ex.submit(download, base, p["i"], p["im"], a.cell * 2): p["i"] for p in prods}
+        futs = {ex.submit(download, base, p["i"], p["im"], 0): p["i"] for p in prods}
         for n, f in enumerate(cf.as_completed(futs), 1):
             ok[futs[f]] = f.result()
             if n % 500 == 0:
@@ -99,7 +103,8 @@ def main() -> None:
                 im = Image.open(IMG_DIR / f"{p['i']}.jpg").convert("RGB")
             except Exception:  # noqa: BLE001
                 continue
-            im.thumbnail((a.cell, a.cell), Image.LANCZOS)
+            im.thumbnail((a.cell - 8, a.cell - 8), Image.LANCZOS)
+            im = im.filter(ImageFilter.UnsharpMask(radius=0.8, percent=60, threshold=2))
             x = (i % a.grid) * a.cell + (a.cell - im.width) // 2
             y = (i // a.grid) * a.cell + (a.cell - im.height) // 2
             sheet.paste(im, (x, y))
