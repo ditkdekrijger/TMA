@@ -2,3 +2,5 @@ node_modules
 dist
 dist-single
 data/tma/cache/
+data/tma/images/
+data/tma/sprites/

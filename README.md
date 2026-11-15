@@ -25,6 +25,14 @@ npm run build
 De scraper gebruikt alleen de Python-standaardbibliotheek, crawlt bewust rustig (2 parallelle verzoeken met pauze)
 en cachet alles in `data/tma/cache/`, zodat een onderbroken run hervat. Ruwe data: `data/tma/catalog.json`.
 
+### Productfoto's
+
+- **Gewone build** (`npm run build`): foto's worden live van de TMA-server geladen.
+- **Eigen hosting / artifact**: `python3 scripts/build_sprites.py` downloadt alle ±8.700 foto's naar
+  `data/tma/images/` (ook bruikbaar voor eigen CDN) en bundelt ze tot ±140 sprite sheets in `data/tma/sprites/`
+  (64 foto's per vel, gegroepeerd per categorie). `npm run build:single` gebruikt die sheets; publiceer de map
+  `sprites/` naast `index.html`.
+
 ### Prijzen en voorraad
 
 Prijzen en voorraad staan in de TMA-catalogus achter de dealerlogin en worden dus **niet** gescrapet.
@@ -69,7 +77,7 @@ src/components/, src/pages/ UI
 
 1. **Gebruiksrecht.** Productteksten en -foto's zijn eigendom van TMA en de merken. Als TMA-dealer mag je ze
    doorgaans gebruiken, maar leg dit vast met TMA en vraag liefst de officiële dealerfeed (met prijzen en voorraad) aan.
-2. **Foto's** worden nu rechtstreeks van de TMA-server geladen. Download ze voor productie naar eigen hosting/CDN.
+2. **Foto's**: gebruik voor productie de gedownloade foto's uit `data/tma/images/` op eigen hosting/CDN.
 3. **Bereik.** De publieke catalogus van deze partner bevat ±9.000 artikelen; het volledige TMA-aanbod (16.000+,
    o.a. elektrische gitaren, keyboards, PA) loopt via de Benelux-dealerportal/-feed.
 4. Koppel afrekenen aan een betaalprovider (bijv. Mollie) en een orderbackend; pas winkelgegevens aan in `src/lib/config.ts`.
