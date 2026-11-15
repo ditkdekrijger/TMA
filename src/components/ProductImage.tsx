@@ -11,7 +11,7 @@ import ProductArt from './ProductArt'
  *   worden meegepubliceerd, omdat een artifact geen afbeeldingen van andere servers mag laden.
  */
 const MODE: 'remote' | 'sprites' = import.meta.env.MODE === 'single' || import.meta.env.VITE_IMAGES === 'sprites' ? 'sprites' : 'remote'
-const spriteMap = (sprites as { cell: number; grid: number; map: Record<string, [number, number]> })
+const spriteMap = (sprites as unknown as { cell: number; grid: number; map: Record<string, [number, number]> })
 
 export default function ProductImage({ p, path, size = 600, color, className }: { p: Product; path?: string; size?: number; color?: string; className?: string }) {
   const [failed, setFailed] = useState(false)
